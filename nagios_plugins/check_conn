@@ -1,4 +1,4 @@
-# Check network connections in <state>
+# Check network connections in <state>. Return number of connections in that state.
 #!/bin/sh
 if [ $# -ne 6 ]
 then
