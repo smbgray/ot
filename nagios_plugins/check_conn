@@ -1,0 +1,22 @@
+# Check network connections in <state>
+#!/bin/sh
+if [ $# -ne 6 ]
+then
+        echo "usage: $0 -w <warning> -c <critical> -s <state>"
+        exit 1
+fi
+
+nc=`netstat -nap |grep $6|wc -l`
+if [ $nc -ge $4 ]
+then
+        echo "Network connections CRITICAL: connection number in $6 state is $nc"
+        exit 2
+elif [ $nc -ge $2 ]
+   then
+                echo "Network connections WARNING: connection number in $6 state is $nc"
+                exit 1
+   else
+                echo "Network connections OK: connection number in $6 state is $nc"
+                exit 0
+fi
+
