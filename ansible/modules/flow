@@ -1,0 +1,68 @@
+#!/usr/bin/python
+
+import json
+import socket
+import datetime
+
+DOCUMENTATION = '''
+---
+module: flow
+short_description: Checking flows
+description:
+ - Checking flows from host to other server ip:port protocol.
+version_added: "1.1"
+options:
+    ip:
+	description:
+		- Destination IP
+	required: true
+	default: null
+    port:
+	description:
+	    - Destination port
+	required: true
+	default: null
+    proto:
+	description:
+	   - IP protocol to be used. Only UDP ot TCP supported
+	required: false
+	default: tcp
+	choices: ['udp', 'tcp'] 	 
+author: Oleksandr Bilochenko
+'''
+
+
+def main():
+    module = AnsibleModule(
+    argument_spec = dict(
+	ip = dict(required=True),
+	port = dict(required=True),
+	proto = dict(required=False, default='tcp', choices=['tcp','udp'])
+	),
+    check_invalid_arguments=False,
+    add_file_common_args=True,
+    supports_check_mode=True
+    )
+    ip = module.params['ip']
+    port = int(module.params['port'])
+    flow = "flow: "+ip+":"+module.params['port']+" "+module.params['proto']
+    if module.params['proto'] == 'tcp':
+    	sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+	sock.settimeout(4)
+    	result = sock.connect_ex((ip, port))
+    	if result == 0:
+		module.exit_json(msg=flow+" - OK")
+    	else:
+                module.fail_json(msg=flow+" - NOK")
+    else:
+	sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+	sock.settimeout(4)
+        result = sock.connect_ex((ip, port))
+        if result == 0:
+                module.exit_json(msg=flow+" - OK")
+        else:
+                module.fail_json(msg=flow+" - NOK")
+
+
+from ansible.module_utils.basic import *
+main()
